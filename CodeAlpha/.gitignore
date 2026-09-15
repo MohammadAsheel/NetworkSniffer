@@ -1,0 +1,105 @@
+# ==========================================
+# Byte-compiled / optimized / DLL files
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ==========================================
+# Operating System Files
+# ==========================================
+# Windows
+desktop.ini
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ==========================================
+# Captures and PCAPs
+# ==========================================
+captures/*.pcap
+*.pcap
+*.pcapng
+test_output.pcap
+# Preserve sample demo capture for offline testing
+!captures/demo.pcap
+
+# ==========================================
+# Virtual Environments & Secrets
+# ==========================================
+.env
+.env.local
+.env.*.local
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+# IDEs and Code Editors
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.directory
+
+# ==========================================
+# Testing, Coverage & Linters
+# ==========================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# Build & Distribution Artifacts
+# ==========================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+
+# ==========================================
+# Logs and Temporary Files
+# ==========================================
+*.log
+*.tmp
+*.bak
+scratch/
+tmp/
+temp/
+
