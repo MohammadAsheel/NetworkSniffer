@@ -9,6 +9,10 @@ A modular, educational, and high-performance **Network Packet Sniffer & Protocol
 
 The project demonstrates network packet capturing, layer-by-layer protocol dissection, real-time traffic statistics, and payload inspection using both **Scapy** and **Python Standard Library Raw Sockets (`struct.unpack`)**.
 
+<p align="center">
+  <img src="screenshots/TCP%20packet%20capture.png" alt="CodeAlpha Network Sniffer & Protocol Analyzer Preview" width="850"/>
+</p>
+
 ---
 
 ## Table of Contents
@@ -69,32 +73,33 @@ As specified in the **CodeAlpha Cyber Security Internship Task 1**:
 ## Architecture & Protocol Dissection
 
 ```
-                     +---------------------------------------+
-                     |         Physical Network Card         |
-                     +---------------------------------------+
-                                         |
-                       [Promiscuous / Capture Mode]
-                                         |
-              +--------------------------+--------------------------+
-              |                                                     |
-    [Scapy Engine (sniffer.py)]                           [Raw Socket (raw_socket_sniffer.py)]
-    - BPF Filter Support                                  - AF_INET, SOCK_RAW, IPPROTO_IP
-    - PCAP Export (wrpcap)                                - struct.unpack('!BBHHHBBH4s4s')
-              |                                                     |
-              +--------------------------+--------------------------+
-                                         |
-                                         v
-                         [Packet Parser (packet_parser.py)]
-      +-----------------------------------------------------------------------+
-      |  Ethernet  |  MAC Addresses & EtherType                               |
-      |  IPv4/IPv6 |  Source/Dest IPs, TTL, Protocol ID                       |
-      |  TCP/UDP   |  Ports, Sequence/Ack, Flags (SYN/ACK/FIN), Service Name  |
-      |  ICMP/ARP  |  Ping Request/Reply, ARP resolutions                     |
-      |  Payload   |  Wireshark-style Hex + ASCII Dump Formatter              |
-      +-----------------------------------------------------------------------+
-                                         |
-                                         v
-                            [Rich Terminal UI & Stats]
+                      +---------------------------------------+
+                      |         Physical Network Card         |
+                      +---------------------------------------+
+                                          |
+                        [Promiscuous / Capture Mode]
+                                          |
+               +--------------------------+--------------------------+
+               |                                                     |
+     [Scapy Engine Mode]                                  [Raw Socket Engine Mode]
+     - BPF Filter Support                                 - Pure Python (socket + struct)
+     - PCAP Export (wrpcap)                               - struct.unpack('!BBHHHBBH4s4s')
+               |                                                     |
+               +--------------------------+--------------------------+
+                                          |
+                                          v
+                      [Packet Parser & Protocol Dissector]
+       +-----------------------------------------------------------------------+
+       |  Ethernet  |  MAC Addresses & EtherType                               |
+       |  IPv4/IPv6 |  Source/Dest IPs, TTL, Protocol ID                       |
+       |  TCP/UDP   |  Ports, Sequence/Ack, Flags (SYN/ACK/FIN), Service Name  |
+       |  ICMP/ARP  |  Ping Request/Reply, ARP resolutions                     |
+       |  Payload   |  Wireshark-style Hex + ASCII Dump Formatter              |
+       +-----------------------------------------------------------------------+
+                                          |
+                                          v
+                    [Rich Terminal UI, Analytics & CLI Menu]
+                      All integrated in a single `sniffer.py`
 ```
 
 ---
@@ -129,7 +134,7 @@ pip install -r requirements.txt
 ### 1. Interactive Menu Mode
 The simplest way to run the sniffer is through the interactive CLI menu:
 ```bash
-python main.py
+python sniffer.py
 ```
 This presents a menu where you can choose preset filters, set packet limits, run simulations, or select output `.pcap` files:
 ```text
@@ -147,17 +152,21 @@ This presents a menu where you can choose preset filters, set packet limits, run
   0) Exit
 ```
 
+<p align="center">
+  <img src="screenshots/Filter.png" alt="Interactive Menu & Protocol Filters" width="750"/>
+</p>
+
 ### 2. Multi-Protocol Simulation (Demo Mode - No Admin Required)
 If you want to immediately see the packet dissector, payload hex dump, and analytics without requiring Administrator privileges or live external traffic:
 ```bash
-python main.py --demo
+python sniffer.py --demo
 ```
 This generates and parses synthetic packets across ARP, DNS, TCP 3-Way Handshake, HTTP GET/200 OK, ICMP Ping, and TLS Handshake.
 
 ### 3. Offline PCAP File Analysis
 To dissect and inspect existing `.pcap` capture files offline:
 ```bash
-python main.py -r captures/demo.pcap
+python sniffer.py -r captures/demo.pcap
 ```
 
 ### 4. Command-Line Options (CLI)
@@ -165,36 +174,38 @@ You can directly pass command-line arguments:
 
 ```bash
 # Run simulation demo
-python main.py --demo
+python sniffer.py --demo
 
 # Dissect offline PCAP file
-python main.py -r captures/demo.pcap
+python sniffer.py -r captures/demo.pcap
 
 # Capture 10 packets on default interface
-python main.py -c 10
+python sniffer.py -c 10
 
 # Capture 5 ICMP (Ping) packets
-python main.py -f "icmp" -c 5
+python sniffer.py -f "icmp" -c 5
 
 # Capture DNS queries and responses
-python main.py -f "udp port 53" -c 15
+python sniffer.py -f "udp port 53" -c 15
 
 # Capture web traffic and save to PCAP file
-python main.py -f "tcp port 80 or tcp port 8080" -o captures/web_traffic.pcap
+python sniffer.py -f "tcp port 80 or tcp port 8080" -o captures/web_traffic.pcap
 
 # High-speed capture without printing payload hex dumps
-python main.py -c 100 --no-payload
+python sniffer.py -c 100 --no-payload
 
 # List all available network adapters with IP and MAC
-python main.py --list-interfaces
+python sniffer.py --list-interfaces
 ```
+
+<p align="center">
+  <img src="screenshots/Network%20interfaces.png" alt="Available Network Interfaces" width="750"/>
+</p>
 
 ### 5. Raw Socket Engine (Pure Python)
 To test low-level socket programming without Scapy:
 ```bash
-python main.py -m raw -c 10
-# Or directly:
-python raw_socket_sniffer.py 10
+python sniffer.py -m raw -c 10
 ```
 
 ---
@@ -202,6 +213,11 @@ python raw_socket_sniffer.py 10
 ## Sample Outputs & Analytics
 
 ### Live Packet Dissection & Hex Dump
+
+<p align="center">
+  <img src="screenshots/TCP%20packet%20capture.png" alt="TCP Packet Capture & TLS Inspection" width="750"/>
+</p>
+
 ```text
 Packet #1 [21:31:59.465] TCP   | Source IP Address: 192.168.31.37:51539 -> Destination IP Address: 172.217.118.4:443 (55 B) [HTTPS / TLS] Flags=[ACK] 
 +─ Payload (1 bytes) ─────────────────────────────────────────────────────────+
@@ -211,7 +227,16 @@ Packet #2 [21:31:59.482] DNS   | Source IP Address: 192.168.31.232:5353 -> Desti
 [+] Successfully saved 2 packets to: captures/capture.pcap
 ```
 
+<p align="center">
+  <img src="screenshots/UDP%20packet%20capture.png" alt="UDP Packet Capture & SSDP Payload" width="750"/>
+</p>
+
 ### Session Analytics & Statistics
+
+<p align="center">
+  <img src="screenshots/Capture%20session%20analytics.png" alt="Capture Session Analytics" width="750"/>
+</p>
+
 ```text
 ======================================================================
 [*] CAPTURE SESSION ANALYTICS & SUMMARY
@@ -241,23 +266,52 @@ Network Endpoints (Top IP Addresses & Packets):
 
 ---
 
-## Screenshots
+## Screenshots & Visual Showcase
 
-The following screenshots show the main functionalities of the network sniffer, including interface discovery, protocol filtering, and packet capture analysis.
+The following high-resolution screenshots demonstrate the core functionalities and visual styling of the CodeAlpha Network Sniffer:
 
-### Interface and Capture Screens
+### 1. Interactive Menu & Protocol Filters
+Guided terminal menu for selecting capture modes, BPF protocol filters, interface selection, simulation, and offline PCAP analysis.
 
-![Network Interfaces](screenshots/Network%20interfaces.png)
+<p align="center">
+  <img src="screenshots/Filter.png" alt="Interactive Menu & Protocol Filters" width="800"/>
+</p>
 
-![TCP Packet Capture](screenshots/TCP%20packet%20capture.png)
+---
 
-![UDP Packet Capture](screenshots/UDP%20packet%20capture.png)
+### 2. Available Network Interfaces Discovery
+Automatic discovery and mapping of all network adapters (Wi-Fi, Ethernet, Loopback, Virtual adapters) with IPs and MACs.
 
-### Filter and Analytics Views
+<p align="center">
+  <img src="screenshots/Network%20interfaces.png" alt="Available Network Interfaces" width="800"/>
+</p>
 
-![Filter Panel](screenshots/Filter.png)
+---
 
-![Capture Session Analytics](screenshots/Capture%20session%20analytics.png)
+### 3. Live TCP Packet Dissection & TLS Inspection
+Dissecting TCP 3-way handshakes, control flags (`SYN`, `ACK`, `PSH`), sequence numbers, HTTPS/TLS identification, and hex/ASCII dumps.
+
+<p align="center">
+  <img src="screenshots/TCP%20packet%20capture.png" alt="TCP Packet Capture & TLS Inspection" width="800"/>
+</p>
+
+---
+
+### 4. Live UDP & DNS Query Capture
+Real-time capture of UDP datagrams, SSDP multicasts, and DNS queries with dual-column payload decoding.
+
+<p align="center">
+  <img src="screenshots/UDP%20packet%20capture.png" alt="UDP Datagrams and DNS Queries" width="800"/>
+</p>
+
+---
+
+### 5. Capture Session Analytics & Traffic Summary
+Post-capture analytical dashboard computing traffic volume, duration, packets/sec throughput, protocol distribution, and Top Talker endpoints.
+
+<p align="center">
+  <img src="screenshots/Capture%20session%20analytics.png" alt="Capture Session Analytics Summary" width="800"/>
+</p>
 
 ---
 
@@ -299,7 +353,7 @@ As required by CodeAlpha instruction #4 (*"Post a video explanation of your proj
 > 1. *A **Scapy Engine** supporting Berkeley Packet Filters and PCAP exports.*
 > 2. *A **Pure Raw Socket Engine** using Python’s standard `socket` and `struct` libraries, unpacking binary headers byte-by-byte.*
 >
-> **[Demonstration Step 2: Run a live capture e.g. `python main.py -c 10`]**
+> **[Demonstration Step 2: Run a live capture e.g. `python sniffer.py -c 10` or `python sniffer.py --demo`]**
 >
 > *"Here, you can see live network packets being captured in real-time. For every packet, our tool extracts:*
 > - *Layer 2 MAC addresses and Layer 3 IPv4/IPv6 addresses.*
@@ -322,28 +376,26 @@ As required by CodeAlpha instruction #4 (*"Post a video explanation of your proj
 ```
 CodeAlpha_Network_Sniffer/
 │
-├── main.py                 # Interactive CLI & argument entrypoint
-├── sniffer.py              # Main Scapy sniffer engine with analytics & PCAP export
-├── raw_socket_sniffer.py   # Low-level standard library socket engine (struct unpacking)
-├── packet_parser.py        # Protocol decoder, TCP flag dissector, Hex/ASCII formatter
-├── test_sniffer.py         # Automated test suite (10 unit & integration tests)
-├── requirements.txt        # Python dependencies (scapy, rich)
+├── .gitignore              # Git ignore rules for Python caches, virtual environments, and PCAP logs
 ├── README.md               # Complete project documentation & presentation guide
-└── captures/               # Default output directory for saved .pcap captures
+├── requirements.txt        # Python dependencies (scapy, rich)
+├── sniffer.py              # Complete unified network sniffer (Scapy + Raw Sockets + CLI + Analytics)
+├── captures/               # Sample and saved .pcap captures
+└── screenshots/            # Demonstration screenshots for documentation
 ```
 
 ---
 
-## Running Automated Tests
+## Running Verification & Demo
 
-To run the automated test suite verifying packet parsing, synthetic TCP/UDP/ICMP/DNS/ARP packets, and PCAP file generation:
+To run the packet dissection simulation verifying multi-protocol dissection (ARP, DNS, TCP Handshake, HTTP, ICMP, and TLS):
 ```bash
-python test_sniffer.py
+python sniffer.py --demo
 ```
-Output:
-```text
-Ran 10 tests in 0.030s
-OK
+
+To dissect and verify with an offline PCAP capture:
+```bash
+python sniffer.py -r captures/demo.pcap
 ```
 
 ---

@@ -1,4 +1,0 @@
-# CodeAlpha Cybersecurity Internship - Task 1: Basic Network Sniffer
-# Dependencies
-scapy>=2.5.0
-rich>=13.0.0
