@@ -1,4 +1,4 @@
-# CodeAlpha - Basic Network Sniffer & Protocol Analyzer
+ Basic Network Sniffer & Protocol Analyzer
 
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Cyber Security](https://img.shields.io/badge/Domain-Cyber%20Security-red?style=for-the-badge)](https://en.wikipedia.org/wiki/Computer_security)
